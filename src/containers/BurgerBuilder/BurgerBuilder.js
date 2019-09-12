@@ -27,7 +27,8 @@ class BurgerBuilder extends Component{
     }
 
     componentDidMount(){
-        axios.get('/orders/ingredients.json')
+        console.log(this.props);
+        axios.get('/ingredients.json')
             .then(response => {
                 this.setState({ingredients : response.data});
             })
@@ -68,31 +69,17 @@ class BurgerBuilder extends Component{
     }
 
     purchaseContinueHandler = () => {
-        // alert('You continue!');
-        this.setState({loading:true});
-        const order = {
-            ingredients: this.state.ingredients,
-            //On a real projectr, it is necessary to calculate again on server 
-            //the price to avoid manipulation from the user.
-            price: this.state.totalPrice,
-            customer: {
-                name: 'Elson',
-                adress: {
-                    street: 'Cherryhill',
-                    zipcode: '4H5O4Y',
-                    country: 'Canada'
-                },
-                email: 'test@test.com'
-            },
-            deliveryMethod: 'fastest'
+       
+        const queryParams= [];
+        for(let i in this.state.ingredients){
+            queryParams.push(encodeURIComponent(i)+ '=' + encodeURIComponent(this.state.ingredients[i]));
         }
-        axios.post('/orders.json', order)
-            .then(response => {
-                this.setState({loading:false, purchasing: false});
-            })
-            .catch(error => {
-                this.setState({loading:false, purchasing: false});
-            });
+        queryParams.push('price='+this.state.totalPrice);
+        const queryString = queryParams.join('&');
+        this.props.history.push({
+            pathname: '/checkout',
+            search: '?' + queryString
+        });
     }
 
     removeIngredientHandler = (type) => {
